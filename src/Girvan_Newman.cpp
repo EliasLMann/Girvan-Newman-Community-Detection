@@ -1,3 +1,7 @@
+//
+// Created by Elias Mann
+//
+
 #include "Girvan_Newman.h"
 #include <iostream>
 #include <boost/graph/graph_traits.hpp>
@@ -22,53 +26,57 @@ Graph CreateGraph(string inputFile) {
     //reading in the file
     ifstream input;
     input.open(inputFile);
-    string numEdgesStr;
-    //retrieving number of edges
-    getline(input, numEdgesStr);
-    int numEdges = stoi(numEdgesStr);
-    //mapping passed in character to index enumeration
-    map<char, int> charToInt;
-    //vertex vector
-    vector<char> vertices;
-    //edge array
-    pair<int, int> edgesArray[numEdges];
-    int edgeIndex = 0;
+    if(!input){
+        cout << "Cannot Find Input File" << endl;
+    }else {
+        string numEdgesStr;
+        //retrieving number of edges
+        getline(input, numEdgesStr);
+        int numEdges = stoi(numEdgesStr);
+        //mapping passed in character to index enumeration
+        map<char, int> charToInt;
+        //vertex vector
+        vector<char> vertices;
+        //edge array
+        pair<int, int> edgesArray[numEdges];
+        int edgeIndex = 0;
 
-    while (!input.eof()) {
-        vector<char>::iterator searchIter;
-        string currEdgeStr;
-        getline(input, currEdgeStr);
-        //add first vertex to array if it does not already exist
-        searchIter = find(vertices.begin(), vertices.end(), currEdgeStr[0]);
-        if (searchIter == vertices.end()) {
-            vertices.push_back(currEdgeStr[0]);
-            //add new vertex to char to int maps
-            charToInt.emplace(currEdgeStr[0], vertices.size() - 1);
-            intToChar.emplace(vertices.size() - 1, currEdgeStr[0]);
+        while (!input.eof()) {
+            vector<char>::iterator searchIter;
+            string currEdgeStr;
+            getline(input, currEdgeStr);
+            //add first vertex to array if it does not already exist
+            searchIter = find(vertices.begin(), vertices.end(), currEdgeStr[0]);
+            if (searchIter == vertices.end()) {
+                vertices.push_back(currEdgeStr[0]);
+                //add new vertex to char to int maps
+                charToInt.emplace(currEdgeStr[0], vertices.size() - 1);
+                intToChar.emplace(vertices.size() - 1, currEdgeStr[0]);
+            }
+            //add second vertex to array if it does not already exist
+            searchIter = find(vertices.begin(), vertices.end(), currEdgeStr[4]);
+            if (searchIter == vertices.end()) {
+                vertices.push_back(currEdgeStr[4]);
+                //add new vertex to char to int maps
+                charToInt.emplace(currEdgeStr[4], vertices.size() - 1);
+                intToChar.emplace(vertices.size() - 1, currEdgeStr[4]);
+            }
+            //getting the integer associated with each vertex in the current edge
+            int vert1 = charToInt.find(currEdgeStr[0])->second;
+            int vert2 = charToInt.find(currEdgeStr[4])->second;
+            pair<int, int> currEdge = make_pair(vert1, vert2);
+            edgesArray[edgeIndex] = currEdge;
+            edgeIndex++;
         }
-        //add second vertex to array if it does not already exist
-        searchIter = find(vertices.begin(), vertices.end(), currEdgeStr[4]);
-        if (searchIter == vertices.end()) {
-            vertices.push_back(currEdgeStr[4]);
-            //add new vertex to char to int maps
-            charToInt.emplace(currEdgeStr[4], vertices.size() - 1);
-            intToChar.emplace(vertices.size() - 1, currEdgeStr[4]);
-        }
-        //getting the integer associated with each vertex in the current edge
-        int vert1 = charToInt.find(currEdgeStr[0])->second;
-        int vert2 = charToInt.find(currEdgeStr[4])->second;
-        pair<int, int> currEdge = make_pair(vert1, vert2);
-        edgesArray[edgeIndex] = currEdge;
-        edgeIndex++;
+        input.close();
+
+        //creating a graph out of the edges read on from input file
+        Graph adjGraph(edgesArray, edgesArray + numEdges, vertices.size());
+        return adjGraph;
     }
-    input.close();
-
-    //creating a graph out of the edges read on from input file
-    Graph adjGraph(edgesArray, edgesArray + numEdges, vertices.size());
-    return adjGraph;
 }
 
-//function that removes edges until community count changes
+//function that removes edges until the number of communities changes
 void FindCommunities(Graph& adjGraph){
     //creating vector needed to calculate connected components
     vector<int> component(num_vertices(adjGraph));
@@ -149,7 +157,7 @@ void PrintCommunities(Graph& outGraph, string outputFile){
     output.close();
 }
 
-//finding the index of the edge with the greatest betwweness
+//finding the index of the edge with the greatest betweeness
 int FindGreatest(vector<double> betwList){
     int greatestEdge = 0;
     for(int i = 0; i< betwList.size()-1; i++){

@@ -1,10 +1,11 @@
 Community 1:
-C
 B
+C
 D
 E
 F
 G
+P
 H
 I
 J
@@ -12,27 +13,10 @@ K
 L
 M
 N
-O
-R
-S
-U
-W
-[
-Y
-Z
-]
-^
-_
-\
-`
-a
-b
-P
 Q
-T
-V
-X
+O
 
 Community 2:
-c
+R
+S
 
