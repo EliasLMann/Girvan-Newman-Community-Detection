@@ -49,6 +49,8 @@ boost/graph/adjacency_list.hpp
 -
 string
 -
+vector
+-
 
 /usr/local/include/boost/algorithm/string/compare.hpp
 boost/algorithm/string/config.hpp
