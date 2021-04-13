@@ -17,6 +17,8 @@ boost/graph/adjacency_list.hpp
 -
 boost/graph/betweenness_centrality.hpp
 -
+boost/graph/connected_components.hpp
+-
 boost/graph/edge_list.hpp
 -
 boost/graph/dijkstra_shortest_paths.hpp
@@ -43,6 +45,8 @@ map
 -
 
 /Users/eliasmann/Desktop/Algorithms/21s-pa03-eliasmann/src/Girvan_Newman.h
+boost/graph/adjacency_list.hpp
+-
 string
 -
 
@@ -9348,6 +9352,24 @@ boost/next_prior.hpp
 boost/property_map/transform_value_property_map.hpp
 -
 boost/mpl/print.hpp
+-
+
+/usr/local/include/boost/graph/connected_components.hpp
+boost/config.hpp
+-
+boost/graph/depth_first_search.hpp
+-
+boost/graph/properties.hpp
+-
+boost/graph/graph_concepts.hpp
+-
+boost/graph/overloading.hpp
+-
+boost/graph/detail/mpi_include.hpp
+-
+boost/static_assert.hpp
+-
+boost/concept/assert.hpp
 -
 
 /usr/local/include/boost/graph/depth_first_search.hpp

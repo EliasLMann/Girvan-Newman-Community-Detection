@@ -11,9 +11,9 @@
 using namespace std;
 using namespace boost;
 
-typedef adjacency_list<vecS, vecS, bidirectionalS> Graph;
 
 int main(int argc, char* const argv[]){
-    CreateGraph(argv[1]);
+    Graph myGraph = CreateGraph(argv[1]);
+    FindCommunities(myGraph);
     return 0;
 }

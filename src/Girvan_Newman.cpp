@@ -20,14 +20,9 @@
 using namespace std;
 using namespace boost;
 
-typedef property < vertex_centrality_t, double > CentralityMap;
-typedef property <edge_centrality_t, double > EdgeCentralityMap;
-typedef adjacency_list <vecS, vecS, undirectedS, CentralityMap ,EdgeCentralityMap> Graph;
-
-typedef boost::concepts::EdgeListGraph<Graph> EdgeGraph;
 
 
-void CreateGraph(string inputFile) {
+Graph CreateGraph(string inputFile) {
     ifstream input;
     input.open(inputFile);
     string numEdgesStr;
@@ -35,69 +30,114 @@ void CreateGraph(string inputFile) {
     int numEdges = stoi(numEdgesStr);
     vector<char> vertices;
     //edge vector
-    pair<int,int> edgesArray[numEdges];
+    pair<int, int> edgesArray[numEdges];
     int edgeIndex = 0;
     //maps to store character vertices and their respective integers
-    map<char,int> charToInt;
-    map<int,char> intToChar;
+    map<char, int> charToInt;
+    map<int, char> intToChar;
 
-    while(!input.eof()){
+    while (!input.eof()) {
         vector<char>::iterator searchIter;
         string currEdgeStr;
         getline(input, currEdgeStr);
         //add first vertex to array if it does not already exist
-        searchIter = find (vertices.begin(), vertices.end(), currEdgeStr[0]);
-        if(searchIter == vertices.end()){
+        searchIter = find(vertices.begin(), vertices.end(), currEdgeStr[0]);
+        if (searchIter == vertices.end()) {
             vertices.push_back(currEdgeStr[0]);
             //add new vertex to char to int maps
-            charToInt.emplace(currEdgeStr[0], vertices.size()-1);
-            intToChar.emplace(vertices.size()-1, currEdgeStr[0]);
+            charToInt.emplace(currEdgeStr[0], vertices.size() - 1);
+            intToChar.emplace(vertices.size() - 1, currEdgeStr[0]);
         }
         //add second vertex to array if it does not already exist
-        searchIter = find (vertices.begin(), vertices.end(), currEdgeStr[4]);
-        if(searchIter == vertices.end()){
+        searchIter = find(vertices.begin(), vertices.end(), currEdgeStr[4]);
+        if (searchIter == vertices.end()) {
             vertices.push_back(currEdgeStr[4]);
             //add new vertex to char to int maps
-            charToInt.emplace(currEdgeStr[4], vertices.size()-1);
-            intToChar.emplace(vertices.size()-1, currEdgeStr[4]);
+            charToInt.emplace(currEdgeStr[4], vertices.size() - 1);
+            intToChar.emplace(vertices.size() - 1, currEdgeStr[4]);
         }
         //getting the integer associated with each vertex in the current edge
         int vert1 = charToInt.find(currEdgeStr[0])->second;
         int vert2 = charToInt.find(currEdgeStr[4])->second;
-        pair<int,int> currEdge = make_pair(vert1, vert2);
+        pair<int, int> currEdge = make_pair(vert1, vert2);
         edgesArray[edgeIndex] = currEdge;
         edgeIndex++;
     }
 
-    std::vector<double> centrality(vertices.size());
-    std::vector<double> edgeCentrality(numEdges);
+    //creating a graph out of the edges read on from input file
     Graph adjGraph(edgesArray, edgesArray + numEdges, vertices.size());
-    EdgeGraph eGraph;
-//    for(int i = 0; i < numEdges; i++){
-//        add_edge(edgesArray[i].first, edgesArray[i].second, eGraph.g);
-//    }
+    return adjGraph;
+}
 
-    //typedef for edge descriptor for each edge
-    typedef graph_traits< Graph >::edge_descriptor Edge_info;
-    //create two iterators that will be the return value of edgesArray(g)
-    graph_traits< Graph >::edge_iterator ei_start, ei_end;
+void FindCommunities(Graph& adjGraph){
+    //creating vector needed to calculate connected components
+    vector<int> component(num_vertices(adjGraph));
 
-    eGraph.g = adjGraph;
-    eGraph.const_constraints(adjGraph);
-    //centrality_map(make_iterator_property_map(centrality.begin(),get(vertex_index, eGraph.g),double())).vertex_index_map(get(vertex_index,eGraph.g));
+    //calculating initial components in graph
+    int startComponents = connected_components(adjGraph, &component[0]);
+    int currComponents = startComponents;
 
-    map<Edge_info, int> edgeMap;
-    associative_property_map <map<Edge_info, int>> edgeIndexMap(edgeMap);
-    int x = connected_components(adjGraph, edgeIndexMap);
+    //continues to remove the edge with the greatest betweeness centrality until the number of components changes
+    while(currComponents == startComponents){
+        //vectors storing the betweeness centralities for the vertices and edges
+        std::vector<double> centrality(num_vertices(adjGraph));
+        std::vector<double> edgeCentrality(num_edges(adjGraph));
 
+        //typedef for edge descriptor for each edge
+        typedef graph_traits< Graph >::edge_descriptor Edge_info;
+        //creating two iterators that will be the return value of edgesArray(g)
+        graph_traits< Graph >::edge_iterator ei_start, ei_end;
 
-    int index = 0;
-    for(tie(ei_start, ei_end) = edges(adjGraph); ei_start != ei_end; ++ei_start){
-        Edge_info e = *ei_start;
-        edgeMap.emplace(make_pair(e,index));
-        index++;
+        //creating and edge index map to create edge centrality map
+        map<Edge_info, int> edgeMap;
+        associative_property_map <map<Edge_info, int>> edgeIndexMap(edgeMap);
+
+        //populating index map
+        int index = 0;
+        for(tie(ei_start, ei_end) = edges(adjGraph); ei_start != ei_end; ++ei_start){
+            Edge_info e = *ei_start;
+            edgeMap.emplace(make_pair(e,index));
+            index++;
+        }
+
+        //call brandess betweeness function to find vertex and edge betweenesses
+        brandes_betweenness_centrality(adjGraph,
+            //creating a centrality map with an iterator property map
+           centrality_map(make_iterator_property_map(
+                   //creating iterator property map with a vertex index offset map and vertex centrality vector
+                   centrality.begin(),get(vertex_index, adjGraph)))
+                   //creating edge centrality map with an iterator property map create
+                   .edge_centrality_map(make_iterator_property_map(
+                           //creating iterator property map with a edge index offset map and edge centrality vector
+                           edgeCentrality.begin(),edgeIndexMap))
+                           //populating the edge and vertex betweeness vectors
+                   .vertex_index_map(get(vertex_index,adjGraph)));
+
+        //finding the index of the edge with the greatest betwweness
+        int greatestEdge = 0;
+        for(int i = 0; i< edgeCentrality.size()-1; i++){
+            if(edgeCentrality.at(i) > edgeCentrality.at (i+1)){
+                greatestEdge = i;
+            }else{
+                greatestEdge = i+1;
+            }
+        }
+
+        //finding the edge at the given index
+        Edge_info foundEdge;
+        tie(ei_start, ei_end) = edges(adjGraph);
+        for(int j = 0; j <= greatestEdge; ++ei_start, j++){
+            foundEdge = *ei_start;
+        }
+
+        //removing found edge from graph
+        adjGraph.remove_edge(foundEdge);
+
+        //recalculating number for connected components in the graph
+        vector<int> component(num_vertices(adjGraph));
+        currComponents = connected_components(adjGraph, &component[0]);
     }
 
-    brandes_betweenness_centrality(adjGraph,centrality_map(make_iterator_property_map(centrality.begin(),get(vertex_index, adjGraph))).edge_centrality_map(make_iterator_property_map(edgeCentrality.begin(),edgeIndexMap)).vertex_index_map(get(vertex_index,adjGraph)));
-
+    int x=45;
+    int y = x;
 }
