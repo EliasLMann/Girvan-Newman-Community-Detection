@@ -8,8 +8,8 @@ env: 21-s-pa03-eliasmann
   ###   List them in the order that they need to appear in Argv param of main.
   ###   Output Files will follow input files
   ###   Note: These should be the actual names of the files.  No double quotes
-  INPUT_FILES: input_edges.txt
-  OUTPUT_FILES: output_communities.txt
+  INPUT_FILES: data/input_edges.txt
+  OUTPUT_FILES: data/output_communities.txt
 
 ### DO NOT MODIFY ANYTHING BELOW THIS LINE!!!
 
