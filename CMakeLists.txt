@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.16)
 project(21-s-pa03-eliasmann)
 
 set(CMAKE_CXX_STANDARD 17)
-#set(CMAKE_CXX_FLAGS_DEBUG "-O3")
-#set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+
+set(CMAKE_CXX_FLAG_RELEASE "03")
 
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
