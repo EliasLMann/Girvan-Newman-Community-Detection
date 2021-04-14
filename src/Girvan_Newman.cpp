@@ -19,7 +19,7 @@ using namespace std;
 using namespace boost;
 
 //maps enumeration back to passed in character
-map<int, char> intToChar;
+map<int, char> g_intToChar;
 
 //function that creates a graph from the input file
 Graph CreateGraph(string inputFile) {
@@ -51,7 +51,7 @@ Graph CreateGraph(string inputFile) {
                 vertices.push_back(currEdgeStr[0]);
                 //add new vertex to char to int maps
                 charToInt.emplace(currEdgeStr[0], vertices.size() - 1);
-                intToChar.emplace(vertices.size() - 1, currEdgeStr[0]);
+                g_intToChar.emplace(vertices.size() - 1, currEdgeStr[0]);
             }
             //add second vertex to array if it does not already exist
             searchIter = find(vertices.begin(), vertices.end(), currEdgeStr[4]);
@@ -59,7 +59,7 @@ Graph CreateGraph(string inputFile) {
                 vertices.push_back(currEdgeStr[4]);
                 //add new vertex to char to int maps
                 charToInt.emplace(currEdgeStr[4], vertices.size() - 1);
-                intToChar.emplace(vertices.size() - 1, currEdgeStr[4]);
+                g_intToChar.emplace(vertices.size() - 1, currEdgeStr[4]);
             }
             //getting the integer associated with each vertex in the current edge
             int vert1 = charToInt.find(currEdgeStr[0])->second;
@@ -149,7 +149,7 @@ void PrintCommunities(Graph& outGraph, string outputFile){
         for (int vertex = 0; vertex < component.size(); vertex++) {
             //outputting the current vertex if it is part of the current community
             if(component[vertex] == components){
-                output << intToChar.find(vertex)->second << endl;
+                output << g_intToChar.find(vertex)->second << endl;
             }
         }
         output << endl;
@@ -157,7 +157,7 @@ void PrintCommunities(Graph& outGraph, string outputFile){
     output.close();
 }
 
-//finding the index of the edge with the greatest betweeness
+//finding the index of the edge with the greatest betweenness
 int FindGreatest(vector<double> betwList){
     int greatestEdge = 0;
     for(int i = 0; i< betwList.size()-1; i++){

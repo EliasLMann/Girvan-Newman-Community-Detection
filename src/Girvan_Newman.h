@@ -24,7 +24,6 @@ void PrintCommunities(Graph& outGraph, string outputFile);
 
 //finding the index of the edge with the greatest betweeness
 int FindGreatest(vector<double> betwList);
-
 //function that removes the edge of a given graph
 void RemoveEdge(int greatestEdge, Graph& adjGraph);
 
